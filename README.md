@@ -1,10 +1,10 @@
-# Mayhomes ZK Sync Agent 📡
+# ZK Sync Agent 📡
 
 [Vietnamese version below]
 
 ## 🌐 English Overview
 
-The **Mayhomes ZK Sync Agent** is an Electron-based middleware designed to bridge the connectivity gap between local **Ronald Jack (ZK)** attendance hardware and the **Odoo Cloud** platform.
+The **ZK Sync Agent** is an Electron-based middleware designed to bridge the connectivity gap between local **Ronald Jack (ZK)** attendance hardware and the **Odoo Cloud** platform.
 
 ### 🔄 Data Flow Diagram
 
