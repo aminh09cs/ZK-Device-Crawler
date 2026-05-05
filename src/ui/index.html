@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Mayhomes ZK Sync Agent</title>
+    <style>
+        :root {
+            --bg: #0f172a;
+            --card: #1e293b;
+            --accent: #38bdf8;
+            --text: #f8fafc;
+            --success: #22c55e;
+            --error: #ef4444;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            margin: 0;
+            padding: 20px;
+            overflow: hidden;
+        }
+        .container {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .badge {
+            background: var(--accent);
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        .stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+        .card {
+            background: var(--card);
+            padding: 20px;
+            border-radius: 12px;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        .card-title {
+            color: #94a3b8;
+            font-size: 13px;
+            margin-bottom: 8px;
+        }
+        .card-value {
+            font-size: 24px;
+            font-weight: bold;
+        }
+        .log-container {
+            background: #000;
+            height: 250px;
+            border-radius: 8px;
+            padding: 10px;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 12px;
+            overflow-y: auto;
+            color: #22c55e;
+            border: 1px solid #333;
+        }
+        .btn {
+            background: var(--accent);
+            color: #000;
+            border: none;
+            padding: 12px;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+        .btn:hover { opacity: 0.9; }
+        .status-dot {
+            height: 10px;
+            width: 10px;
+            background-color: var(--success);
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h2>Mayhomes ZK Agent</h2>
+            <div class="badge">v1.0.0</div>
+        </div>
+
+        <div class="card">
+            <div class="card-title">Device Connection</div>
+            <div class="card-value" id="device-ip">192.168.5.11</div>
+            <div style="margin-top: 10px; font-size: 14px;">
+                <span class="status-dot"></span> Online
+            </div>
+        </div>
+
+        <div class="stats">
+            <div class="card">
+                <div class="card-title">Last Processed</div>
+                <div class="card-value" id="last-count">0</div>
+            </div>
+            <div class="card">
+                <div class="card-title">Status</div>
+                <div class="card-value" id="sync-status" style="font-size: 18px;">Ready</div>
+            </div>
+        </div>
+
+        <div>
+            <div class="card-title">Recent Logs</div>
+            <div class="log-container" id="logs">
+                <div style="color: #64748b;">[SYSTEM] Agent started...</div>
+            </div>
+        </div>
+
+        <button class="btn" id="sync-btn">Force Sync Now</button>
+    </div>
+
+    <script>
+        const { ipcRenderer } = require('electron');
+        
+        const btn = document.getElementById('sync-btn');
+        const logs = document.getElementById('logs');
+        const ipDisplay = document.getElementById('device-ip');
+        const countDisplay = document.getElementById('last-count');
+        const statusDisplay = document.getElementById('sync-status');
+
+        function addLog(message, type = 'info') {
+            const line = document.createElement('div');
+            const time = new Date().toLocaleTimeString();
+            line.innerText = `[${time}] ${message}`;
+            if (type === 'error') line.style.color = '#ef4444';
+            logs.appendChild(line);
+            logs.scrollTop = logs.scrollHeight;
+        }
+
+        ipcRenderer.on('init', (e, config) => {
+            if (config && config.zk_ip) {
+                ipDisplay.innerText = config.zk_ip;
+                addLog(`Device ${config.zk_ip} configured.`);
+            }
+        });
+
+        ipcRenderer.on('log', (e, message) => {
+            addLog(message);
+        });
+
+        ipcRenderer.on('status-update', (e, result) => {
+            countDisplay.innerText = result.processed;
+            statusDisplay.innerText = result.status.toUpperCase();
+            statusDisplay.style.color = result.status === 'success' ? '#22c55e' : '#ef4444';
+        });
+
+        btn.onclick = () => {
+            ipcRenderer.invoke('force-sync');
+            statusDisplay.innerText = 'SYNCING...';
+            addLog('Manual sync requested...');
+        };
+
+        // Initialize IP from config on start
+        window.onload = async () => {
+            try {
+                const config = await ipcRenderer.invoke('get-config');
+                if (config && config.zk_ip) {
+                    ipDisplay.innerText = config.zk_ip;
+                }
+            } catch (e) {}
+        };
+    </script>
+</body>
+</html>

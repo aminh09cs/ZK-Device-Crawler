@@ -1,0 +1,8 @@
+{
+  "zk_ip": "192.168.5.11",
+  "zk_port": 4370,
+  "zk_timeout": 10000,
+  "odoo_webhook_url": "https://admin.salepro.com/api/zk/attendance",
+  "api_token": "REPLACE_WITH_TOKEN",
+  "sync_interval_minutes": 30
+}
