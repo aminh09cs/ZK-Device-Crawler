@@ -85,6 +85,3 @@ electron-zk-agent/
 - **`npm run build:ts`**: Biên dịch toàn bộ code TypeScript sang JavaScript (lưu vào thư mục `dist`).
 - **`npm start`**: Chạy ứng dụng ở chế độ Dashboard để kiểm tra.
 - **`npm run build:win`**: Đóng gói ứng dụng thành file `.exe` để cài đặt lên Windows.
-
----
-*Phát triển bởi Antigravity AI dành cho Mayhomes.*
